@@ -70,3 +70,17 @@ for i in range(0, len(churn_simulated_metrics.dtypes), 1):
 
 for m in cols_:
     cohort_plot(churn_simulated_metrics, m, 'is_churn', 10, 5)
+
+########################################################################################################################################
+# DATA SPLIT
+########################################################################################################################################
+churn_simulated_metrics['obs_date'] = pd.to_datetime(churn_simulated_metrics['obs_date'], format = '%Y-%m-%d')
+churn_simulated_metrics.sort_values(by = 'obs_date', ascending = True, inplace = True)
+churn_simulated_metrics.reset_index(inplace = True, drop = True)
+
+# Prepare features and target labels
+X = np.array(churn_simulated_metrics.loc[:, col_list])
+y = np.array(churn_simulated_metrics.loc[:, 'is_churn'])
+
+# Time series split
+tscv = TimeSeriesSplit(n_splits = 3)
