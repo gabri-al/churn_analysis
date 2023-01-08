@@ -68,5 +68,5 @@ for i in range(0, len(churn_simulated_metrics.dtypes), 1):
     if (str(churn_simulated_metrics.dtypes[i]) not in exclude_) & (churn_simulated_metrics.columns[i] != 'is_churn'):
         cols_.append(churn_simulated_metrics.columns[i])
 
-for m in col_list:
+for m in cols_:
     cohort_plot(churn_simulated_metrics, m, 'is_churn', 10, 5)
