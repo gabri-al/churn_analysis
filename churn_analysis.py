@@ -84,3 +84,19 @@ y = np.array(churn_simulated_metrics.loc[:, 'is_churn'])
 
 # Time series split
 tscv = TimeSeriesSplit(n_splits = 3)
+
+
+########################################################################################################################################
+# LOGISTIC REGRESSION
+########################################################################################################################################
+# Hyperparam selection
+base_model = LogisticRegression(solver = 'liblinear')
+test_par = {'C': [.005, .01, .04, .08, .16, .32, .64, .75, .95],
+            'penalty' : ['l1','l2']          
+           }
+LR_gsearch = GridSearchCV(base_model, param_grid = test_par, scoring = 'roc_auc', cv = tscv, verbose = 1, n_jobs = -1)
+LR_gsearch.fit(X,y)
+LR_result_df = pd.DataFrame(LR_gsearch.cv_results_)
+
+print(LR_gsearch.best_score_)
+print(LR_gsearch.best_params_)
