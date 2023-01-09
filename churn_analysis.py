@@ -145,3 +145,58 @@ X_feature = col_list
 RF_feat = pd.DataFrame(data = XGB_gsearch.best_estimator_.feature_importances_, index = X_feature, columns=['importance'])
 RF_feat.sort_values('importance').plot(kind='barh', title = 'XGB Feature Importance')
 plt.show()
+
+########################################################################################################################################
+# TEST SET UPLOAD
+########################################################################################################################################
+col_list = ['discount_ratio','mrr_ratio','mrr_ratio_A','mrr_ratio_B','support_chats','subs_A','subs_B']
+col_list_full = ['obs_date', 'is_churn'] + col_list + ['has_addon']
+
+_path = r'/Users/yourname/Test_simulated_data.xlsx'
+test_set = pd.read_excel(_path, sheet_name = 'Sheet1')
+test_set = test_set.astype({'is_churn':'int',
+                            'discount_ratio':'float',
+                            'mrr_ratio':'float',
+                            'mrr_ratio_A':'float','mrr_ratio_B':'float',
+                            'support_chats':'float',
+                            'subs_A':'float','subs_B':'float',
+                            'has_addon':'int'})
+print(test_set.head(2))
+
+# Prepare data for modelling
+if 'has_addon' not in col_list:
+    col_list = col_list+['has_addon']
+X_test = np.array(test_set.loc[:, col_list])
+y_test = np.array(test_set.loc[:, 'is_churn'])
+
+print(X_test.shape)
+print(y_test.shape)
+
+########################################################################################################################################
+# MODEL PREDICTIONS
+#######################################################################################################################################
+y_test_pred = XGB_gsearch.best_estimator_.predict_proba(X_test)[:,1]
+print(metrics.roc_auc_score(y_test,y_test_pred))
+
+metrics.plot_roc_curve(XGB_gsearch.best_estimator_, X_test, y_test)
+plt.show()
+
+# Add predictions to the test set & calculate the confusion matrix
+test_set['Predicted Churn Proba'] = y_test_pred
+
+predicted_class = []
+threshold = .5
+for index, row in test_set.iterrows():
+    if row['Predicted Churn Proba'] >= threshold:
+        predicted_class.append(1)
+    else:
+        predicted_class.append(0)
+        
+test_set['Predicted Churn Class'] = predicted_class
+
+# Confusion matrix
+confusion_matrix = metrics.confusion_matrix(test_set['is_churn'], test_set['Predicted Churn Class'], 
+                                            labels=XGB_gsearch.best_estimator_.classes_)
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=XGB_gsearch.best_estimator_.classes_)
+cm_display.plot(cmap='RdPu')
+# print(test_set.sort_values(by=['Predicted Churn Proba','is_churn'], ascending = False).head(5))
