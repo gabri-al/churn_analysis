@@ -129,10 +129,10 @@ plt.show()
 ########################################################################################################################################
 # Hyperparam selection
 base_model = xgb.XGBClassifier(objective='binary:logistic', n_jobs = -1, eval_metric = 'auc')
-test_par = {'max_depth' : [2,16,17,18,19,20,21,22,25,30],
-            'learning_rate': [.15,.2,.3,.7],
-            'n_estimators': [5,10,20,21,22,25,26,27,28,30],
-            'min_child_weight': [.05,.15,.25,.4,.5,1,2]}
+test_par = {'max_depth' : [2,10,20,25,40],
+            'learning_rate': [.1,.2,.5],
+            'n_estimators': [5,10,20,30,50],
+            'min_child_weight': [.05,.15,.5,1]}
 XGB_gsearch = GridSearchCV(base_model, param_grid = test_par, scoring = 'roc_auc', cv=tscv, verbose=1, n_jobs=-1, refit=True)
 XGB_gsearch.fit(X,y)
 XGB_result_df = pd.DataFrame(XGB_gsearch.cv_results_)
