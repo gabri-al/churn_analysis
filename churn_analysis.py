@@ -195,8 +195,7 @@ for index, row in test_set.iterrows():
 test_set['Predicted Churn Class'] = predicted_class
 
 # Confusion matrix
-confusion_matrix = metrics.confusion_matrix(test_set['is_churn'], test_set['Predicted Churn Class'], 
-                                            labels=XGB_gsearch.best_estimator_.classes_)
+confusion_matrix = metrics.confusion_matrix(test_set['is_churn'], test_set['Predicted Churn Class'], labels=XGB_gsearch.best_estimator_.classes_)
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=XGB_gsearch.best_estimator_.classes_)
 cm_display.plot(cmap='RdPu')
 # print(test_set.sort_values(by=['Predicted Churn Proba','is_churn'], ascending = False).head(5))
