@@ -123,3 +123,25 @@ X_feature = col_list
 RF_feat = pd.DataFrame(data = RF_gsearch.best_estimator_.feature_importances_, index = X_feature, columns=['importance'])
 RF_feat.sort_values('importance').plot(kind='barh', title = 'RF Feature Importance')
 plt.show()
+
+########################################################################################################################################
+# XGBOOST
+########################################################################################################################################
+# Hyperparam selection
+base_model = xgb.XGBClassifier(objective='binary:logistic', n_jobs = -1, eval_metric = 'auc')
+test_par = {'max_depth' : [2,16,17,18,19,20,21,22,25,30],
+            'learning_rate': [.15,.2,.3,.7],
+            'n_estimators': [5,10,20,21,22,25,26,27,28,30],
+            'min_child_weight': [.05,.15,.25,.4,.5,1,2]}
+XGB_gsearch = GridSearchCV(base_model, param_grid = test_par, scoring = 'roc_auc', cv=tscv, verbose=1, n_jobs=-1, refit=True)
+XGB_gsearch.fit(X,y)
+XGB_result_df = pd.DataFrame(XGB_gsearch.cv_results_)
+
+print(XGB_gsearch.best_score_)
+print(XGB_gsearch.best_params_)
+
+# Check feature importance
+X_feature = col_list
+RF_feat = pd.DataFrame(data = XGB_gsearch.best_estimator_.feature_importances_, index = X_feature, columns=['importance'])
+RF_feat.sort_values('importance').plot(kind='barh', title = 'XGB Feature Importance')
+plt.show()
