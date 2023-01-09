@@ -79,6 +79,8 @@ churn_simulated_metrics.sort_values(by = 'obs_date', ascending = True, inplace =
 churn_simulated_metrics.reset_index(inplace = True, drop = True)
 
 # Prepare features and target labels
+if 'has_addon' not in col_list:
+    col_list = col_list+['has_addon']
 X = np.array(churn_simulated_metrics.loc[:, col_list])
 y = np.array(churn_simulated_metrics.loc[:, 'is_churn'])
 
@@ -100,3 +102,24 @@ LR_result_df = pd.DataFrame(LR_gsearch.cv_results_)
 
 print(LR_gsearch.best_score_)
 print(LR_gsearch.best_params_)
+
+########################################################################################################################################
+# RANDOM FOREST
+########################################################################################################################################
+# Hyperparam selection
+base_model = RandomForestClassifier(n_jobs = -1)
+test_par = {'max_depth' : [2,5,10],
+            'max_features': ['sqrt', 'log2'],
+            'n_estimators': [5,10,100,500,1000]}
+RF_gsearch = GridSearchCV(base_model, param_grid = test_par, scoring = 'roc_auc', cv=tscv, verbose=1, n_jobs=-1, refit=True)
+RF_gsearch.fit(X,y)
+RF_result_df = pd.DataFrame(RF_gsearch.cv_results_)
+
+print(RF_gsearch.best_score_)
+print(RF_gsearch.best_params_)
+
+# Check feature importance
+X_feature = col_list
+RF_feat = pd.DataFrame(data = RF_gsearch.best_estimator_.feature_importances_, index = X_feature, columns=['importance'])
+RF_feat.sort_values('importance').plot(kind='barh', title = 'RF Feature Importance')
+plt.show()
